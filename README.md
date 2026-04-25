@@ -4,8 +4,8 @@
 This repository contains a DevSecOps project where we design, build, test, exploit, and secure a web application. The goal is to implement a complete secure software development lifecycle using both automated and manual security practices.
 
 ## Contributors
-Aliza Fatima
-Ehzem Farhan Sheikh
+Aliza Fatima, 
+Ehzem Farhan Sheikh, 
 Muskan Rehan
 
 ## Objectives
