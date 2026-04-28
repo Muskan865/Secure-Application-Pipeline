@@ -38,10 +38,12 @@ Open the link shown in the terminal, usually:
 http://localhost:5173
 ```
 
-## Option A - Pull the Docker image
+## Option B - Pull the Docker image
 You do not need to install Node.js or npm manually. You only need Docker.
-
-Run in terminal: docker pull ghcr.io/ehzem/secure-application-pipeline:latest
+Run in terminal:
+```txt
+ docker pull ghcr.io/ehzem/secure-application-pipeline:latest
+```
 
 
 ## Important Note
