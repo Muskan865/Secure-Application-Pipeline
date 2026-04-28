@@ -869,6 +869,9 @@ function Checkout({
     city: "Karachi"
   });
 
+  const [paymentStatus, setPaymentStatus] = useState("idle");
+  const [transactionCode, setTransactionCode] = useState("");
+
   if (!currentUser) {
     return (
       <main className="page">
@@ -897,7 +900,16 @@ function Checkout({
 
   function submit(event) {
     event.preventDefault();
-    createOrder(form);
+
+    if (paymentStatus !== "approved") {
+      alert("Please complete the demo payment before placing the order.");
+      return;
+    }
+
+    createOrder({
+      ...form,
+      transactionCode
+    });
   }
 
   return (
@@ -946,25 +958,143 @@ function Checkout({
             />
           </label>
 
-          <div className="paymentBox">
-            <CreditCard />
-            <div>
-              <strong>Payment</strong>
-            </div>
-          </div>
+          <PaymentTerminal
+            total={total}
+            paymentStatus={paymentStatus}
+            setPaymentStatus={setPaymentStatus}
+            transactionCode={transactionCode}
+            setTransactionCode={setTransactionCode}
+            form={form}
+            createOrder={createOrder}
+          />
 
-          <button className="primaryButton full">Place Order</button>
         </form>
 
         <SummaryCard
           subtotal={subtotal}
           delivery={delivery}
           total={total}
-          buttonText="Place Order"
-          onClick={() => createOrder(form)}
+          buttonText=""
+          onClick={() => {}}
         />
       </section>
     </main>
+  );
+}
+
+function PaymentTerminal({
+  total,
+  paymentStatus,
+  setPaymentStatus,
+  transactionCode,
+  setTransactionCode,
+  form,
+  createOrder
+}) {
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardName, setCardName] = useState("");
+  const [expiry, setExpiry] = useState("");
+  const [pin, setPin] = useState("");
+
+  function processPaymentAndOrder() {
+    if (!form.name || !form.phone || !form.address || !form.city) {
+      alert("Please fill your shipping details first.");
+      return;
+    }
+
+    if (!cardNumber || !cardName || !expiry || !pin) {
+      alert("Please fill all payment fields.");
+      return;
+    }
+
+    setPaymentStatus("processing");
+
+    setTimeout(() => {
+      const code = "TXN-" + Math.floor(100000 + Math.random() * 900000);
+      setTransactionCode(code);
+      setPaymentStatus("approved");
+
+      createOrder({
+        ...form,
+        transactionCode: code
+      });
+    }, 1500);
+  }
+
+  return (
+    <div className="paymentTerminal">
+      <div className="terminalHeader">
+        <CreditCard />
+        <div>
+          <strong>Payment Terminal</strong>
+          <p>Enter payment details and place your order.</p>
+        </div>
+      </div>
+
+      <div className="terminalScreen">
+        <span>AMOUNT</span>
+        <strong>{money(total)}</strong>
+
+        {paymentStatus === "idle" && <p>Waiting for payment details...</p>}
+        {paymentStatus === "processing" && <p>Processing transaction...</p>}
+        {paymentStatus === "approved" && (
+          <p className="approvedText">Approved • {transactionCode}</p>
+        )}
+      </div>
+
+      <label>
+        Cardholder Name
+        <input
+          value={cardName}
+          onChange={(event) => setCardName(event.target.value)}
+          placeholder="Example: Ehzem Sheikh"
+        />
+      </label>
+
+      <label>
+        Card Number
+        <input
+          value={cardNumber}
+          onChange={(event) => setCardNumber(event.target.value)}
+          placeholder="4242 4242 4242 4242"
+          maxLength="19"
+        />
+      </label>
+
+      <div className="twoCols">
+        <label>
+          Expiry
+          <input
+            value={expiry}
+            onChange={(event) => setExpiry(event.target.value)}
+            placeholder="12/28"
+            maxLength="5"
+          />
+        </label>
+
+        <label>
+          PIN / CVV
+          <input
+            value={pin}
+            onChange={(event) => setPin(event.target.value)}
+            placeholder="123"
+            maxLength="4"
+            type="password"
+          />
+        </label>
+      </div>
+
+      <button
+        type="button"
+        className="primaryButton full"
+        onClick={processPaymentAndOrder}
+        disabled={paymentStatus === "processing"}
+      >
+        {paymentStatus === "processing"
+          ? "Processing..."
+          : "Pay and Place Order"}
+      </button>
+    </div>
   );
 }
 
@@ -984,9 +1114,11 @@ function SummaryCard({ subtotal, delivery, total, buttonText, onClick }) {
         <span>Total</span>
         <strong>{money(total)}</strong>
       </div>
-      <button className="primaryButton full" onClick={onClick}>
-        {buttonText}
-      </button>
+      {buttonText && (
+        <button className="primaryButton full" onClick={onClick}>
+          {buttonText}
+        </button>
+      )}
     </aside>
   );
 }

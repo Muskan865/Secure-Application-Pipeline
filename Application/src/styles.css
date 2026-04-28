@@ -914,3 +914,74 @@ footer strong {
     flex-direction: column;
   }
 }
+
+
+.paymentTerminal {
+  display: grid;
+  gap: 14px;
+  background: linear-gradient(135deg, #2b2229, #4d3542);
+  color: white;
+  padding: 20px;
+  border-radius: 22px;
+  box-shadow: 0 20px 45px rgba(43, 34, 41, 0.22);
+}
+
+.terminalHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.terminalHeader svg {
+  color: #ffd9e5;
+}
+
+.terminalHeader p {
+  margin: 4px 0 0;
+  color: #ead7df;
+  font-size: 0.9rem;
+}
+
+.terminalScreen {
+  background: #171217;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 18px;
+  padding: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.terminalScreen span {
+  color: #cbb7c0;
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+  font-weight: 800;
+}
+
+.terminalScreen strong {
+  font-size: 1.8rem;
+}
+
+.terminalScreen p {
+  margin: 0;
+  color: #ead7df;
+}
+
+.approvedText {
+  color: #a8f0c6 !important;
+  font-weight: 800;
+}
+
+.paymentTerminal label {
+  color: #f7eaf0;
+}
+
+.paymentTerminal input {
+  background: rgba(255, 255, 255, 0.95);
+  color: #25212a;
+}
+
+.paymentTerminal button:disabled {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
