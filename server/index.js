@@ -167,7 +167,7 @@ app.get("/api/search", async (req, res) => {
 
 app.post("/api/admin/reports", async (req, res) => {
   const { reportType } = req.body;
-  const data = await pool.query(`SELECT * FROM reports WHERE type = '${reportType}'`);
+  const data = await pool.query("SELECT * FROM reports WHERE type = $1", [reportType]);
   res.json(data.rows);
 });
 
@@ -175,9 +175,20 @@ app.get("/api/download", async (req, res) => {
   const file = req.query.file;
   const fs = await import("fs");
   const path = await import("path");
-  const filePath = path.resolve("/tmp/downloads/" + file);
-  const content = fs.readFileSync(filePath, "utf8");
-  res.json({ content });
+
+  const allowedDir = path.resolve("/tmp/downloads");
+  const filePath = path.resolve(allowedDir, file);
+
+  if (!filePath.startsWith(allowedDir + path.sep)) {
+    return res.status(403).json({ message: "Access denied" });
+  }
+
+  try {
+    const content = fs.readFileSync(filePath, "utf8");
+    res.json({ content });
+  } catch {
+    res.status(404).json({ message: "File not found" });
+  }
 });
 
 app.get("/api/redirect", async (req, res) => {
