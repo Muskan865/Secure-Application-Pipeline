@@ -176,7 +176,7 @@ app.get("/api/download", async (req, res) => {
   const fs = await import("fs");
   const path = await import("path");
 
-  const allowedDir = path.resolve("/tmp/downloads");
+  const allowedDir = path.resolve("./downloads");  
   const filePath = path.resolve(allowedDir, file);
 
   if (!filePath.startsWith(allowedDir + path.sep)) {
