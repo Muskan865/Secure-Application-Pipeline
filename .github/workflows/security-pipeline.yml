@@ -1,19 +1,49 @@
+name: Secure Application DevSecOps Pipeline
+
 on:
   push:
+    branches:
+      - main
   pull_request:
+    branches:
+      - main
+  workflow_dispatch:
 
 jobs:
-  sast_scan:
-    name: SAST - Semgrep
+
+  # 1. BUILD + DOCKER SETUP
+  build:
+    name: Build Docker Environment
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Start Docker Compose
+        run: docker compose up -d --build
+
+      - name: Wait for services to start
+        run: sleep 30
+
+      - name: Verify containers
+        run: docker ps
+
+
+  # 2. SAST - SEMGREP
+  sast_semgrep:
+    name: SAST - Semgrep Scan
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Run Semgrep
+      - name: Run Semgrep Scan
         run: |
           semgrep scan \
             --config p/security-audit \
@@ -24,12 +54,16 @@ jobs:
             --verbose \
             .
 
-  sonarcloud_scan:
-    name: SAST - SonarCloud
+
+  # 3. SAST - SONARCLOUD
+  sast_sonar:
+    name: SAST - SonarCloud Scan
     runs-on: ubuntu-latest
+    needs: build
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -37,9 +71,49 @@ jobs:
         uses: SonarSource/sonarqube-scan-action@v5.0.0
         with:
           args: >
-            -Dsonar.qualitygate.wait=false 
+            -Dsonar.qualitygate.wait=false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
-          #
+
+
+  # 4. SCA - SBOM GENERATION
+  sca_sbom:
+    name: SCA - SBOM Generation (CycloneDX)
+    runs-on: ubuntu-latest
+    needs: build
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate SBOM
+        uses: anchore/sbom-action@v0
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: full-project-sbom.json
+
+      - name: Upload SBOM Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-report
+          path: full-project-sbom.json
+
+
+  # 5. DAST - OWASP ZAP
+  dast_zap:
+    name: DAST - OWASP ZAP Scan
+    runs-on: ubuntu-latest
+    needs: [build, sast_semgrep, sast_sonar, sca_sbom]
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Run OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.12.0
+        with:
+          target: http://localhost:4000
+          fail_action: false
