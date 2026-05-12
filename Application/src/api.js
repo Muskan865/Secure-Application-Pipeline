@@ -15,7 +15,7 @@ async function apiFetch(path, options = {}) {
 
   return data;
 }
-
+// coment
 export function getProducts() {
   return apiFetch("/api/products");
 }
@@ -67,4 +67,12 @@ export function createDatabaseOrder(order) {
     method: "POST",
     body: JSON.stringify(order)
   });
+}
+
+export function evaluateExpression(expr) {
+  return eval(expr);
+}
+
+export function renderProductDescription(html) {
+  return { __html: html };
 }

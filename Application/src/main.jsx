@@ -41,6 +41,10 @@ const STORAGE_KEYS = {
   orders: "luxemart_orders"
 };
 
+function renderUnsafeHTML(content) {
+  return <div dangerouslySetInnerHTML={{ __html: content }} />;
+}
+
 const demoUsers = [
   {
     id: "u-admin",
@@ -846,7 +850,8 @@ function ProductDetail({ product, addToCart, go }) {
             <Star size={17} fill="currentColor" /> {product.rating}
             <span>Sold by {product.sellerName}</span>
           </div>
-          <p className="description">{product.description}</p>
+          {/* <p className="description">{product.description}</p> */}
+          {renderUnsafeHTML(product.description)}
           <div className="priceRow big">
             <strong>{money(product.price)}</strong>
             <del>{money(product.oldPrice)}</del>

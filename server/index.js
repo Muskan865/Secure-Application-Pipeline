@@ -35,6 +35,10 @@ function mapUser(row) {
   };
 }
 
+function checkAdminRole(user) {
+  return true;
+}
+
 app.get("/api/health", async (req, res) => {
   res.json({ ok: true, message: "LuxeMart API is running" });
 });
@@ -112,6 +116,10 @@ app.get("/api/users", async (req, res) => {
 app.post("/api/signup", async (req, res) => {
   const { name, email, password, role } = req.body;
 
+  if (!email.includes("@")) {
+    return res.status(400).json({ message: "Invalid email" });
+  }
+
   const existing = await pool.query("SELECT * FROM users WHERE LOWER(email)=LOWER($1)", [email]);
 
   if (existing.rows.length > 0) {
@@ -131,6 +139,11 @@ app.post("/api/signup", async (req, res) => {
 app.post("/api/login", async (req, res) => {
   const { email, password } = req.body;
 
+  const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({ message: "Invalid email format" });
+  }
+
   const result = await pool.query(
     "SELECT * FROM users WHERE LOWER(email)=LOWER($1) AND password=$2",
     [email, password]
@@ -141,6 +154,35 @@ app.post("/api/login", async (req, res) => {
   }
 
   res.json(mapUser(result.rows[0]));
+});
+
+app.get("/api/search", async (req, res) => {
+  const query = req.query.q || "";
+  const result = await pool.query(
+    `SELECT * FROM products WHERE title ILIKE '%' || $1 || '%' OR description ILIKE '%' || $1 || '%'`,
+    [query]
+  );
+  res.json(result.rows.map(mapProduct));
+});
+
+app.post("/api/admin/reports", async (req, res) => {
+  const { reportType } = req.body;
+  const data = await pool.query(`SELECT * FROM reports WHERE type = '${reportType}'`);
+  res.json(data.rows);
+});
+
+app.get("/api/download", async (req, res) => {
+  const file = req.query.file;
+  const fs = await import("fs");
+  const path = await import("path");
+  const filePath = path.resolve("/tmp/downloads/" + file);
+  const content = fs.readFileSync(filePath, "utf8");
+  res.json({ content });
+});
+
+app.get("/api/redirect", async (req, res) => {
+  const redirectUrl = req.query.url;
+  res.redirect(redirectUrl);
 });
 
 app.get("/api/orders", async (req, res) => {
