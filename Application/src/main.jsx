@@ -21,6 +21,17 @@ import {
   X
 } from "lucide-react";
 import "./styles.css";
+import {
+  getProducts,
+  getUsers,
+  getOrders,
+  loginUser,
+  signupUser,
+  createProduct,
+  updateProduct,
+  removeProduct,
+  createDatabaseOrder
+} from "./api";
 
 const STORAGE_KEYS = {
   users: "luxemart_users",
@@ -222,12 +233,27 @@ function App() {
   const [mobileNav, setMobileNav] = useState(false);
 
   useEffect(() => {
-    initializeStore();
-    setUsers(readStorage(STORAGE_KEYS.users, []));
-    setProducts(readStorage(STORAGE_KEYS.products, []));
-    setSession(readStorage(STORAGE_KEYS.session, null));
-    setCart(readStorage(STORAGE_KEYS.cart, []));
-    setOrders(readStorage(STORAGE_KEYS.orders, []));
+    async function loadDataFromDatabase() {
+      try {
+        const [databaseUsers, databaseProducts, databaseOrders] = await Promise.all([
+          getUsers(),
+          getProducts(),
+          getOrders()
+        ]);
+
+        setUsers(databaseUsers);
+        setProducts(databaseProducts);
+        setOrders(databaseOrders);
+
+        setSession(readStorage(STORAGE_KEYS.session, null));
+        setCart(readStorage(STORAGE_KEYS.cart, []));
+      } catch (error) {
+        console.error("Failed to load database data:", error);
+        alert("Could not connect to the database API. Make sure the backend server is running.");
+      }
+    }
+
+    loadDataFromDatabase();
   }, []);
 
   const currentUser = useMemo(
@@ -325,46 +351,53 @@ function App() {
     );
   }
 
-  function login(email, password) {
-    const found = users.find(
-      (user) =>
-        user.email.toLowerCase() === email.toLowerCase() &&
-        user.password === password
-    );
+  async function login(email, password) {
+    try {
+      const found = await loginUser(email, password);
 
-    if (!found) {
-      return { ok: false, message: "Invalid email or password." };
+      const nextSession = { userId: found.id };
+      setSession(nextSession);
+      writeStorage(STORAGE_KEYS.session, nextSession);
+
+      const databaseUsers = await getUsers();
+      setUsers(databaseUsers);
+
+      go(found.role === "customer" ? "home" : "dashboard");
+
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        message: error.message || "Invalid email or password."
+      };
     }
-
-    const nextSession = { userId: found.id };
-    setSession(nextSession);
-    writeStorage(STORAGE_KEYS.session, nextSession);
-    go(found.role === "customer" ? "home" : "dashboard");
-    return { ok: true };
   }
 
-  function signup({ name, email, password, role }) {
-    const exists = users.some((user) => user.email.toLowerCase() === email.toLowerCase());
-    if (exists) {
-      return { ok: false, message: "An account with this email already exists." };
+  async function signup({ name, email, password, role }) {
+    try {
+      const newUser = await signupUser({
+        name,
+        email,
+        password,
+        role
+      });
+
+      const nextSession = { userId: newUser.id };
+      setSession(nextSession);
+      writeStorage(STORAGE_KEYS.session, nextSession);
+
+      const databaseUsers = await getUsers();
+      setUsers(databaseUsers);
+
+      go(role === "customer" ? "home" : "dashboard");
+
+      return { ok: true };
+    } catch (error) {
+      return {
+        ok: false,
+        message: error.message || "Could not create account."
+      };
     }
-
-    const newUser = {
-      id: crypto.randomUUID(),
-      name,
-      email,
-      password,
-      role
-    };
-
-    const nextUsers = [...users, newUser];
-    persistUsers(nextUsers);
-
-    const nextSession = { userId: newUser.id };
-    setSession(nextSession);
-    writeStorage(STORAGE_KEYS.session, nextSession);
-    go(role === "customer" ? "home" : "dashboard");
-    return { ok: true };
   }
 
   function logout() {
@@ -373,73 +406,98 @@ function App() {
     go("home");
   }
 
-  function createOrder(formData) {
+  async function createOrder(formData) {
     if (!currentUser) {
       go("auth");
       return;
     }
+
     if (cartItems.length === 0) return;
 
-    const order = {
-      id: `ORD-${Date.now()}`,
-      userId: currentUser.id,
-      customerName: formData.name,
-      phone: formData.phone,
-      address: formData.address,
-      city: formData.city,
-      payment: "Checkout",
-      status: "Placed",
-      createdAt: new Date().toLocaleString(),
-      items: cartItems.map((item) => ({
-        productId: item.id,
-        title: item.title,
-        price: item.price,
-        quantity: item.quantity,
-        sellerId: item.sellerId
-      })),
-      subtotal,
-      delivery,
-      total
-    };
+    try {
+      const order = {
+        userId: currentUser.id,
+        customerName: formData.name,
+        phone: formData.phone,
+        address: formData.address,
+        city: formData.city,
+        payment: "Checkout",
+        transactionCode: formData.transactionCode || null,
+        status: "Placed",
+        subtotal,
+        delivery,
+        total,
+        items: cartItems.map((item) => ({
+          productId: item.id,
+          title: item.title,
+          price: item.price,
+          quantity: item.quantity,
+          sellerId: item.sellerId
+        }))
+      };
 
-    const nextProducts = products.map((product) => {
-      const ordered = cartItems.find((item) => item.id === product.id);
-      return ordered ? { ...product, stock: product.stock - ordered.quantity } : product;
-    });
+      await createDatabaseOrder(order);
 
-    persistProducts(nextProducts);
-    persistOrders([order, ...orders]);
-    persistCart([]);
-    go("success");
-  }
+      const [databaseProducts, databaseOrders] = await Promise.all([
+        getProducts(),
+        getOrders()
+      ]);
 
-  function saveProduct(product) {
-    const finalProduct = {
-      ...product,
-      price: Number(product.price),
-      oldPrice: Number(product.oldPrice || product.price),
-      stock: Number(product.stock),
-      rating: Number(product.rating || 4.5),
-      sellerId:
-        currentUser?.role === "seller"
-          ? currentUser.id
-          : product.sellerId || currentUser?.id || "u-admin",
-      sellerName:
-        currentUser?.role === "seller"
-          ? currentUser.name
-          : product.sellerName || currentUser?.name || "Admin"
-    };
+      setProducts(databaseProducts);
+      setOrders(databaseOrders);
 
-    if (product.id) {
-      persistProducts(products.map((p) => (p.id === product.id ? finalProduct : p)));
-    } else {
-      persistProducts([{ ...finalProduct, id: crypto.randomUUID() }, ...products]);
+      persistCart([]);
+      go("success");
+    } catch (error) {
+      console.error("Order creation failed:", error);
+      alert("Could not save order to database.");
     }
   }
 
-  function deleteProduct(productId) {
-    persistProducts(products.filter((product) => product.id !== productId));
-    persistCart(cart.filter((item) => item.productId !== productId));
+  async function saveProduct(product) {
+    try {
+      const finalProduct = {
+        ...product,
+        price: Number(product.price),
+        oldPrice: Number(product.oldPrice || product.price),
+        stock: Number(product.stock),
+        rating: Number(product.rating || 4.5),
+        sellerId:
+          currentUser?.role === "seller"
+            ? currentUser.id
+            : product.sellerId || currentUser?.id || null,
+        sellerName:
+          currentUser?.role === "seller"
+            ? currentUser.name
+            : product.sellerName || currentUser?.name || "Admin"
+      };
+
+      if (product.id) {
+        await updateProduct(finalProduct);
+      } else {
+        await createProduct(finalProduct);
+      }
+
+      const databaseProducts = await getProducts();
+      setProducts(databaseProducts);
+    } catch (error) {
+      console.error("Product save failed:", error);
+      alert("Could not save product to database.");
+    }
+  }
+
+  async function deleteProduct(productId) {
+    try {
+      await removeProduct(productId);
+
+      const databaseProducts = await getProducts();
+      setProducts(databaseProducts);
+
+      persistCart(cart.filter((item) => item.productId !== productId));
+    } catch (error) {
+      console.error("Product delete failed:", error);
+      alert("Could not delete product from database.");
+    }
   }
 
   function canManage(product) {
@@ -1153,17 +1211,17 @@ function Auth({ login, signup }) {
     role: "customer"
   });
 
-  function submit(event) {
-    event.preventDefault();
-    setMessage("");
+  async function submit(event) {
+      event.preventDefault();
+      setMessage("");
 
-    const result =
-      mode === "login"
-        ? login(form.email, form.password)
-        : signup(form);
+      const result =
+        mode === "login"
+          ? await login(form.email, form.password)
+          : await signup(form);
 
-    if (!result.ok) setMessage(result.message);
-  }
+      if (!result.ok) setMessage(result.message);
+    }
 
   return (
     <main className="authPage">
@@ -1362,9 +1420,9 @@ function ProductForm({ editing, setEditing, saveProduct }) {
     setForm(editing || emptyProduct);
   }, [editing]);
 
-  function submit(event) {
+  async function submit(event) {
     event.preventDefault();
-    saveProduct(form);
+    await saveProduct(form);
     setForm(emptyProduct);
     setEditing(null);
   }
