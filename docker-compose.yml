@@ -1,4 +1,34 @@
 services:
+  frontend:
+    build:
+      context: ./Application
+    container_name: luxemart-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    volumes:
+      - ./Application:/app
+      - /app/node_modules
+
+  backend:
+    build:
+      context: ./server
+    container_name: luxemart-backend
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+    environment:
+      DB_HOST: postgres
+      DB_USER: luxemart_user
+      DB_PASSWORD: luxemart_password
+      DB_NAME: luxemart_db
+      DB_PORT: 5432
+    volumes:
+      - ./server:/app
+      - /app/node_modules
+
   postgres:
     image: postgres:16
     container_name: luxemart-postgres
