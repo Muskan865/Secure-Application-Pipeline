@@ -19,6 +19,7 @@ jobs:
             --config p/security-audit \
             --config p/owasp-top-ten \
             --config p/secrets \
+            --config p/javascript \
             --error \
             --verbose \
             .
