@@ -189,11 +189,11 @@ app.get("/api/redirect", async (req, res) => {
     if (!allowedDomains.includes(url.hostname)) {
       return res.status(400).json({ message: "Redirect target not allowed" });
     }
+    const safeUrl = url.href;
+    return res.redirect(safeUrl);
   } catch (e) {
     return res.status(400).json({ message: "Invalid URL" });
   }
-
-  res.redirect(redirectUrl);
 });
 
 app.get("/api/orders", async (req, res) => {
