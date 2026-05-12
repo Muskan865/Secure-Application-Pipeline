@@ -69,10 +69,10 @@ export function createDatabaseOrder(order) {
   });
 }
 
-export function evaluateExpression(expr) {
-  return eval(expr);
-}
+// export function evaluateExpression(expr) {
+//   return eval(expr);
+// }
 
-export function renderProductDescription(html) {
-  return { __html: html };
-}
+// export function renderProductDescription(html) {
+//   return { __html: html };
+// }
