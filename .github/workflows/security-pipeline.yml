@@ -113,9 +113,5 @@ jobs:
       - name: Run OWASP ZAP
         uses: zaproxy/action-baseline@v0.12.0
         with:
-<<<<<<< HEAD
           target: http://localhost:4000
-=======
-          target: http://localhost:4000
-          fail_action: false
->>>>>>> 34a87ce48dd311b9f8f2d3e152af2acc2f221573
+
