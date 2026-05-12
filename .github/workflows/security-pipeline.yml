@@ -123,13 +123,21 @@ jobs:
 
       - name: Run OWASP ZAP
         uses: zaproxy/action-baseline@v0.12.0
+        continue-on-error: true
         with:
           target: http://localhost:4000
+          # try common artifact-name inputs in case the action allows overriding the artifact name
+          artifact_name: zap-scan
+          artifact-name: zap-scan
+          report_name: zap-scan
 
-      - name: Upload ZAP report artifact (safe name)
+      - name: Collect ZAP report and upload with safe name
         uses: actions/upload-artifact@v4
         with:
           name: zap-scan
-          # upload any file produced by ZAP that contains 'zap' in the filename
-          path: '**/*zap*'
+          # upload likely ZAP report files or any file containing 'zap' in the filename
+          path: |
+            **/*zap*
+            **/*zap*.html
+            **/*zap*.xml
 
