@@ -13,7 +13,7 @@ jobs:
       - name: Install Semgrep
         run: pip install semgrep
 
-      - name: Run Semgrep (full scan)
+      - name: Run Semgrep
         run: |
           semgrep scan \
             --config p/security-audit \
@@ -33,31 +33,13 @@ jobs:
           fetch-depth: 0
 
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@v5.0.0
+        uses: SonarSource/sonarcloud-github-action@master
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
 
       - name: Check Quality Gate
         uses: SonarSource/sonarqube-quality-gate-action@master
         timeout-minutes: 5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: https://sonarcloud.io
-
-  # sca_scan:
-  #   name: SCA - Trivy
-  #   runs-on: ubuntu-latest
-  #
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Run Trivy
-  #       uses: aquasecurity/trivy-action@master
-  #       with:
-  #         scan-type: fs
-  #         scan-ref: .
-  #         format: table
-  #         severity: HIGH,CRITICAL
-  #         exit-code: 1
