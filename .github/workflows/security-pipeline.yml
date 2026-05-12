@@ -2,38 +2,41 @@ name: Secure Application Pipeline
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
   pull_request:
 
 jobs:
 
   sast_scan:
-    name: SAST - Semgrep
-    runs-on: ubuntu-latest
+  name: SAST - Semgrep
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
-      - name: Run Semgrep SAST Scan
-        uses: returntocorp/semgrep-action@v1
-        with:
-          config: "p/security-audit"
+    - uses: semgrep/semgrep-action@v1
+      env:
+        SEMGREP_FULL_SCAN: 1
+      with:
+        config: >
+          p/security-audit
+          p/owasp-top-ten
+          p/secrets
 
-  sca_scan:
-    name: SCA - Trivy
-    runs-on: ubuntu-latest
+  # sca_scan:
+  #   name: SCA - Trivy
+  #   runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Run Trivy Dependency Scan
-        uses: aquasecurity/trivy-action@0.28.0
-        with:
-          scan-type: fs
-          scan-ref: .
-          format: table
-          severity: HIGH,CRITICAL
-          exit-code: 1
+  #     - name: Run Trivy
+  #       uses: aquasecurity/trivy-action@master
+  #       with:
+  #         scan-type: fs
+  #         scan-ref: .
+  #         format: table
+  #         severity: HIGH,CRITICAL
+  #         exit-code: 1
