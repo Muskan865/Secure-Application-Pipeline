@@ -104,16 +104,17 @@ jobs:
 
   # 5. DAST - OWASP ZAP
   dast_zap:
-    name: DAST - OWASP ZAP Scan
     runs-on: ubuntu-latest
-    needs: build
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Run OWASP ZAP Baseline Scan
+      - name: Start app with docker compose
+        run: docker compose up -d --build
+
+      - name: Wait for app
+        run: sleep 40
+
+      - name: Run OWASP ZAP
         uses: zaproxy/action-baseline@v0.12.0
         with:
           target: http://localhost:4000
-          fail_action: false
