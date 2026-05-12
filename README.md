@@ -32,4 +32,4 @@ Muskan Rehan.
 3. Integrate SAST and SCA into pipeline  
 4. Perform DAST and manual penetration testing  
 5. Exploit identified vulnerabilities  
-6. Fix issues and re-test  
+6. Fix issues and re-test.  
