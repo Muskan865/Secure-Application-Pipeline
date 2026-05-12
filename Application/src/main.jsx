@@ -41,6 +41,10 @@ const STORAGE_KEYS = {
   orders: "luxemart_orders"
 };
 
+function renderUnsafeHTML(content) {
+  return <div dangerouslySetInnerHTML={{ __html: content }} />;
+}
+
 const demoUsers = [
   {
     id: "u-admin",

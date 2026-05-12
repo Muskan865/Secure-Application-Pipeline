@@ -68,3 +68,11 @@ export function createDatabaseOrder(order) {
     body: JSON.stringify(order)
   });
 }
+
+export function evaluateExpression(expr) {
+  return eval(expr);
+}
+
+export function renderProductDescription(html) {
+  return { __html: html };
+}
