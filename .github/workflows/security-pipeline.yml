@@ -5,11 +5,11 @@ on:
 
 jobs:
   sast_scan:
-    name: SAST - Semgrep        
-    runs-on: ubuntu-latest      
+    name: SAST - Semgrep
+    runs-on: ubuntu-latest
 
-    steps:                      
-      - uses: actions/checkout@v4  
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Install Semgrep
         run: pip install semgrep
@@ -23,6 +23,28 @@ jobs:
             --error \
             --verbose \
             .
+
+  sonarcloud_scan:
+    name: SAST - SonarCloud
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
+      - name: Check Quality Gate
+        uses: SonarSource/sonarqube-quality-gate-action@master
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
 
   # sca_scan:
   #   name: SCA - Trivy
