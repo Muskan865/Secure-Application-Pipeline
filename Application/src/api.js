@@ -15,7 +15,7 @@ async function apiFetch(path, options = {}) {
 
   return data;
 }
-
+// coment
 export function getProducts() {
   return apiFetch("/api/products");
 }
