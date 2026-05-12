@@ -1,35 +1,36 @@
 on:
   push:
     branches: [main]
-
   pull_request:
 
 jobs:
   sast_scan:
-    name: SAST - Semgrep
-    runs-on: ubuntu-latest
+    name: SAST - Semgrep        
+    runs-on: ubuntu-latest      
 
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+    steps:                      
+      - uses: actions/checkout@v4  
 
-      - uses: semgrep/semgrep-action@v1
-        env:
-          SEMGREP_FULL_SCAN: 1
-        with:
-          config: >
-            p/security-audit
-            p/owasp-top-ten
-            p/secrets
+      - name: Install Semgrep
+        run: pip install semgrep
+
+      - name: Run Semgrep (full scan)
+        run: |
+          semgrep scan \
+            --config p/security-audit \
+            --config p/owasp-top-ten \
+            --config p/secrets \
+            --error \
+            --verbose \
+            .
 
   # sca_scan:
   #   name: SCA - Trivy
   #   runs-on: ubuntu-latest
-
+  #
   #   steps:
   #     - uses: actions/checkout@v4
-
+  #
   #     - name: Run Trivy
   #       uses: aquasecurity/trivy-action@master
   #       with:
