@@ -182,7 +182,18 @@ app.get("/api/download", async (req, res) => {
 
 app.get("/api/redirect", async (req, res) => {
   const redirectUrl = req.query.url;
-  res.redirect(redirectUrl);
+  const allowedDomains = ["luxemart.com", "www.luxemart.com"];
+
+  try {
+    const url = new URL(redirectUrl);
+    if (!allowedDomains.includes(url.hostname)) {
+      return res.status(400).json({ message: "Redirect target not allowed" });
+    }
+    const safeUrl = url.href;
+    return res.redirect(safeUrl);
+  } catch (e) {
+    return res.status(400).json({ message: "Invalid URL" });
+  }
 });
 
 app.get("/api/orders", async (req, res) => {
