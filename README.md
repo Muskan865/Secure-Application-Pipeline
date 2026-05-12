@@ -6,7 +6,7 @@ This repository contains a DevSecOps project where we design, build, test, explo
 ## Contributors
 Aliza Fatima, 
 Ehzem Farhan Sheikh, 
-Muskan Rehan
+Muskan Rehan.
 
 ## Objectives
 - Develop and containerize a web application
