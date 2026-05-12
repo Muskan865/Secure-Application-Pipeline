@@ -90,8 +90,8 @@ The redirect endpoint reads a `url` parameter directly from the query string and
 - Bypass of browser/email security filters that trust the originating domain
 
 ### Evidence
-![redirect](2a.png)
-![redirect](2b.png)
+![redirect](images/2a.png)
+![redirect](images/2b.png)
 
 ### Remediation
 Validate the redirect target against an allowlist of trusted domains:
@@ -130,8 +130,8 @@ Same as Vulnerability 2.
 Same as Vulnerability 2.
 
 ### Evidence
-![redirect](2a.png)
-![redirect](2b.png)
+![redirect](images/2a.png)
+![redirect](images/2b.png)
 
 ### Remediation
 Same fix as Vulnerability 2 — one code change resolves both Semgrep findings.
@@ -180,8 +180,8 @@ More destructive payloads:
 - Privilege escalation — admin credentials retrievable
 
 ### Evidence
-![alt text](4a.png)
-![alt text](4b.png)
+![alt text](images/4a.png)
+![alt text](images/4b.png)
 
 ### Remediation
 Use parameterized queries:
@@ -228,7 +228,7 @@ The `file` query parameter is concatenated directly into a file path without val
 - Full server filesystem read access within the process user's permissions
 
 ### Evidence
-![alt text](5.png)
+![alt text](images/5.png)
 
 ### Remediation
 Validate that the resolved path stays within the allowed directory:
