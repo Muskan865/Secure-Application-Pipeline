@@ -126,18 +126,23 @@ jobs:
         continue-on-error: true
         with:
           target: http://localhost:4000
-          # try common artifact-name inputs in case the action allows overriding the artifact name
-          artifact_name: zap-scan
-          artifact-name: zap-scan
-          report_name: zap-scan
+          # use a simple alphanumeric artifact name to avoid API validation issues
+          artifact_name: zapscan
+
+      - name: Debug - list potential ZAP output files
+        run: |
+          echo 'Listing files matching common ZAP report patterns:'
+          find . -maxdepth 6 -type f \( -iname '*zap*' -o -iname '*baseline*' -o -iname '*report*' \) -print || true
 
       - name: Collect ZAP report and upload with safe name
         uses: actions/upload-artifact@v4
         with:
-          name: zap-scan
-          # upload likely ZAP report files or any file containing 'zap' in the filename
+          name: zapscan
           path: |
-            **/*zap*
+            **/*baseline*.html
             **/*zap*.html
+            **/*report*.html
+            **/*baseline*.xml
             **/*zap*.xml
+            **/*report*.xml
 
