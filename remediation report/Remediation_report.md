@@ -130,7 +130,7 @@ function renderText(content) {
 
 #### Re-Test Evidence
 
-> *Screenshot to be added here*
+![Open redirect — taint flow confirmed](images/xss.png)
 
 ---
 
@@ -209,7 +209,7 @@ app.get("/api/redirect", async (req, res) => {
 
 #### Re-Test Evidence
 
-> *Screenshot to be added here*
+![Open redirect — taint flow confirmed](images/redirect.png)
 
 ---
 
@@ -302,7 +302,8 @@ app.post("/api/admin/reports", async (req, res) => {
 
 #### Re-Test Evidence
 
-> *Screenshot to be added here*
+![Open redirect — taint flow confirmed](images/sql.png)
+returns empty
 
 ---
 
@@ -398,8 +399,8 @@ app.get("/api/download", async (req, res) => {
 
 #### Re-Test Evidence
 
-> *Screenshot to be added here*
-
+![Open redirect — taint flow confirmed](images/download.png)
+returns empty
 ```
 
 **Expected result:** `0 findings (0 blocking)` from Semgrep, quality gate passing on SonarCloud.
