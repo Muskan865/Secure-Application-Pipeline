@@ -1,5 +1,5 @@
 # Remediation Report
-**LuxeMart Application **
+**LuxeMart Application**
 **Assessment Date:** May 12, 2026
 **Assessed Components:** Frontend (React), Backend (Node.js/Express)
 
@@ -44,7 +44,7 @@ At the time of initial discovery, the application presented a significant attack
 
 | ID | Vulnerability | Severity | CVSS | Status |
 |---|---|---|---|---|
-| V1 | XSS via `dangerouslySetInnerHTML` | High | 7.3 | Fixed |
+| V1 | XSS | High | 7.3 | Fixed |
 | V2 | Open Redirect — Unvalidated URL Parameter (Rule 1) | High | 6.1 | Fixed |
 | V3 | Open Redirect — Unvalidated URL Parameter (Rule 2) | High | 6.1 | Fixed |
 | V4 | SQL Injection in Admin Reports Endpoint | Critical | 9.8 | Fixed |
