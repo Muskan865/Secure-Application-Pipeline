@@ -37,7 +37,7 @@ All five vulnerabilities have been remediated. Re-test results are documented in
 | **Total Findings** | 5 |
 | **Critical** | 1 |
 | **High** | 4 |
-| **Tools Used** | Semgrep, SonarCloud, OWASP ZAP, npm audit |
+| **Tools Used** | Semgrep, SonarCloud |
 | **Assessment Date** | May 12, 2026 |
 | **Status** | All findings remediated |
 
@@ -122,7 +122,7 @@ The admin reports and SQL injection endpoints expose all rows across the databas
 | Data Exposed | Sensitivity |
 |---|---|
 | User email addresses | High |
-| Hashed passwords | Critical |
+| Passwords | Critical |
 | User roles (customer / seller / admin) | High |
 | Order histories and transaction records | High |
 | `JWT_SECRET` via path traversal | Critical |
@@ -303,7 +303,7 @@ Additional destructive payloads:
 
 ### Impact
 - Full database read access — all tables exposed
-- Credential dumping — usernames, hashed passwords, and roles retrievable
+- Credential dumping — usernames, passwords, and roles retrievable
 - Data destruction — tables can be dropped with a single payload
 - Privilege escalation — admin credentials recoverable from the users table
 
