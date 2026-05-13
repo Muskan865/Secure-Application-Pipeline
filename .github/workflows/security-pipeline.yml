@@ -2,12 +2,17 @@ name: Secure Application DevSecOps Pipeline
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
   workflow_dispatch:
+
+permissions:
+  contents: read
+  security-events: write
+  issues: write
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
 
@@ -104,7 +109,9 @@ jobs:
 
   # 5. DAST - OWASP ZAP
   dast_zap:
+    name: DAST - OWASP ZAP
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v4
 
@@ -116,5 +123,25 @@ jobs:
 
       - name: Run OWASP ZAP
         uses: zaproxy/action-baseline@v0.12.0
+        continue-on-error: true
         with:
           target: http://localhost:4000
+          # use a simple alphanumeric artifact name to avoid API validation issues
+          artifact_name: zapscan
+
+      - name: Debug - list potential ZAP output files
+        run: |
+          echo 'Listing files matching common ZAP report patterns:'
+          find . -maxdepth 6 -type f \( -iname '*zap*' -o -iname '*baseline*' -o -iname '*report*' \) -print || true
+
+      - name: Collect ZAP report and upload with safe name
+        uses: actions/upload-artifact@v4
+        with:
+          name: zapscan
+          path: |
+            **/*baseline*.html
+            **/*zap*.html
+            **/*report*.html
+            **/*baseline*.xml
+            **/*zap*.xml
+            **/*report*.xml

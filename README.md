@@ -6,7 +6,7 @@ This repository contains a DevSecOps project where we design, build, test, explo
 ## Contributors
 Aliza Fatima, 
 Ehzem Farhan Sheikh, 
-Muskan Rehan
+Muskan Rehan.
 
 ## Objectives
 - Develop and containerize a web application
@@ -32,4 +32,4 @@ Muskan Rehan
 3. Integrate SAST and SCA into pipeline  
 4. Perform DAST and manual penetration testing  
 5. Exploit identified vulnerabilities  
-6. Fix issues and re-test  
+6. Fix issues and re-test.  
