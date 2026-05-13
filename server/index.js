@@ -1,69 +1,12 @@
 import express from "express";
 import cors from "cors";
-import helmet from "helmet";
 import { pool } from "./db.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// Security: disable x-powered-by header
-app.disable('x-powered-by');
-
-// Use helmet for standard security headers
-app.use(helmet());
-
-// Tighten Content Security Policy
-app.use((req, res, next) => {
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none';"
-  );
-  // Permissions-Policy (formerly Feature-Policy)
-  res.setHeader('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');
-  // Prevent MIME-sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  // Clickjacking protection
-  res.setHeader('X-Frame-Options', 'DENY');
-  // Cache control for sensitive endpoints (default)
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  // HSTS (only effective over HTTPS; safe to set for future deployment)
-  res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  next();
-});
-
-// Configure CORS with an allowlist rather than allowing all origins
-const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:4000'
-];
-
-app.use(cors({
-  origin: (origin, cb) => {
-    // allow requests with no origin (like curl, server-to-server)
-    if (!origin) return cb(null, true);
-    if (allowedOrigins.indexOf(origin) !== -1) {
-      return cb(null, true);
-    }
-    return cb(new Error('CORS policy: Origin not allowed'));
-  }
-}));
-
+app.use(cors());
 app.use(express.json());
-
-// Serve explicit robots.txt and sitemap.xml with secure headers
-app.get('/robots.txt', (req, res) => {
-  res.setHeader('Content-Type', 'text/plain');
-  // Ensure CSP and cache-control applied
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  res.send(`User-agent: *\nDisallow:`);
-});
-
-app.get('/sitemap.xml', (req, res) => {
-  res.setHeader('Content-Type', 'application/xml');
-  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
-  // Placeholder sitemap minimal content
-  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`);
-});
 
 function mapProduct(row) {
   return {

@@ -7,10 +7,9 @@
     "start": "node index.js"
   },
   "dependencies": {
-  "cors": "latest",
-  "dotenv": "latest",
-  "express": "latest",
-  "pg": "latest",
-  "helmet": "latest"
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "pg": "latest"
   }
 }
