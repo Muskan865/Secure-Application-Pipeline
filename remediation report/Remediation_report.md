@@ -400,7 +400,8 @@ app.get("/api/download", async (req, res) => {
 #### Re-Test Evidence
 
 ![Open redirect — taint flow confirmed](images/download.png)
-returns empty
-```
 
-**Expected result:** `0 findings (0 blocking)` from Semgrep, quality gate passing on SonarCloud.
+returns empty
+![Open redirect — taint flow confirmed](images/d2.png)
+
+
