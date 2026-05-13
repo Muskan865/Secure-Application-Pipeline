@@ -50,6 +50,21 @@ app.use(cors({
 
 app.use(express.json());
 
+// Serve explicit robots.txt and sitemap.xml with secure headers
+app.get('/robots.txt', (req, res) => {
+  res.setHeader('Content-Type', 'text/plain');
+  // Ensure CSP and cache-control applied
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  res.send(`User-agent: *\nDisallow:`);
+});
+
+app.get('/sitemap.xml', (req, res) => {
+  res.setHeader('Content-Type', 'application/xml');
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, private');
+  // Placeholder sitemap minimal content
+  res.send(`<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"></urlset>`);
+});
+
 function mapProduct(row) {
   return {
     id: String(row.id),
